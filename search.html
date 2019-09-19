@@ -1,0 +1,82 @@
+<html>
+   <head>
+     <meta charset="utf-8">
+     <meta http-equiv="x-ua-compatible" content="ie=edge">
+     <title>Real Time JSON search in Javascript</title>
+      <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+      <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+      <style>
+         #filter_items{
+         width:100%;
+         padding:10px;
+         }
+         #items-list{
+         margin:0;
+         padding:0;
+         }
+         #items-list li{
+         list-style:none;
+         padding:10px;
+         margin:5px 0;
+         border: 1px solid #e4e4e4;
+         }
+         .spacer{
+           padding-top: 5%;
+         }
+      </style>
+   </head>
+   <body>
+      <div class="container spacer">
+         <input type="text" class="form-control" placeholder="Search for products 🔍" id="filter_items"/>
+         <ul class="list-unstyled" id="items-list">
+         </ul>
+      </div>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+      <script>
+	  //get json using ajax call
+			var json = (function() {
+                 var json = null;
+                 $.ajax({
+                     'async': false,
+                     'global': false,
+                     'crossDomain': true,
+                     'method': 'get',
+                     'url': 'products.json',
+                     'dataType': 'json',
+                     'success': function (data) {
+                         json = data;
+                     }
+                 });
+                 return json;
+             })();
+		
+             ul = document.getElementById("items-list");//define ul
+             input = document.getElementById('filter_items');//define input
+
+			//filter items
+             var filterItems = function(event){
+               ul.innerHTML = "";//deletes each time a search is triggered
+               keyword = input.value.toLowerCase();//get keyword from input
+               if (keyword.length>3) {//if keyword is less than 3 char
+                 var li = "";
+                 var compare = "";
+                 var found = 0;
+                 var total_keys = Object.keys(json.items).length;//get total os keys to get and print
+                 for(var i=0;i<total_keys;i++)
+                 { //check if keyword does match the JSON product and if yes it will show up 
+                   compare = json.items[i]["title"].toLowerCase();
+                   var myPattern = new RegExp('(\\w*'+keyword+'\\w*)','gi');
+                   var matches = compare.match(myPattern);
+                    if (matches !== null) {
+                      found+=1;
+                      li +="<li class='media'><img class='mr-3' src='"+json.items[i]["image"]+"' alt='"+json.items[i]["title"]+"'><div class='media-body'><h5 class='mt-0 mb-1'>"+json.items[i]["title"]+"</h5>"+json.items[i]["path"]+"</div></li>";
+                    }
+                 }
+                 li = "<br><b>Results: "+found+"</b><br>"+li;//add number of results
+                 ul.innerHTML = li;//add results to page
+               }
+             }
+            input.addEventListener('keyup', filterItems);//event listener to execute function each time it gets an input.
+      </script>
+   </body>
+</html>
